@@ -55,20 +55,12 @@ export const formatGwei = (value) => {
   return parseFloat(value / Const.DECIMAL_TIA).toFixed(7);
 };
 
-export const formatGweiFixedZero = (value) => {
-  return parseFloat(value / Const.DECIMAL_TIA).toFixed(0);
-};
-
-export const formatWeiDecimal = (value) => {
-  return new Intl.NumberFormat().format(formatGweiFixedZero(value));
-};
-
 export const formatNumberToDecimal = (value) => {
   return new Intl.NumberFormat().format(value);
 };
 
 export function formatTimeToText(timestamp) {
-  if (timestamp == 0) return "Didn't staked";
+  if (timestamp === 0) return "Didn't staked";
   const date = moment.duration(
     moment(new Date().getTime()).diff(moment(timestamp))
   );
@@ -78,62 +70,23 @@ export function formatTimeToText(timestamp) {
   const hour = date.hours();
   const minute = date.minutes();
   const second = date.seconds();
-
-  if (year > 0) {
-    if (year == 1) {
-      return year + " year ago";
-    } else {
-      return year + " years ago";
+  const time = { year, month, day, hour, minute, second };
+  const units = {
+    year: "years",
+    month: "months",
+    day: "days",
+    hour: "hours",
+    minute: "minutes",
+    second: "seconds",
+  };
+  for (const unit in time) {
+    if (time[unit] > 0) {
+      if (time[unit] === 1) {
+        return time[unit] + " " + unit + " ago";
+      } else {
+        return time[unit] + " " + units[unit] + " ago";
+      }
     }
-  } else if (month > 0) {
-    if (month == 1) {
-      return month + " month ago";
-    } else {
-      return month + " months ago";
-    }
-  } else if (day > 0) {
-    if (day == 1) {
-      return day + " day ago";
-    } else {
-      return day + " days ago";
-    }
-  } else if (hour > 0) {
-    if (hour == 1) {
-      return hour + " hour ago";
-    } else {
-      return hour + " hours ago";
-    }
-  } else if (minute > 0) {
-    if (minute == 1) {
-      return minute + " minute ago";
-    } else {
-      return minute + " minutes ago";
-    }
-  } else {
-    if (second == 1) {
-      return second + " second ago";
-    } else {
-      return second + " seconds ago";
-    }
-  }
-}
-
-export function formatTimestampToText(date) {
-  const month = date.months();
-  let day = date.days();
-  const hours = date.hours();
-  const minutes = date.minutes();
-  if (month > 0) {
-    day = day + month * 30;
-  }
-  if (day > 0) {
-    return `${day < 10 ? "0" + day : day}d ${
-      hours < 10 ? "0" + hours : hours
-    }h ago`;
-  } else {
-    return `${hours < 10 ? "0" + hours : hours}h ${
-      minutes < 10 ? "0" + minutes : minutes
-    }m ago`;
   }
 }
 
@@ -228,7 +181,7 @@ export const getNodeId = async () => {
 
 export const getBalance = async (address) => {
   try {
-    if (address){
+    if (address) {
       const response = await fetch(Const.URL_GET_BALANCE + address);
       const dataJson = await response.json();
       return formatBalance(dataJson.balances);
