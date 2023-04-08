@@ -190,9 +190,9 @@ const LightNodePage = ({ isSearch, searchInput }) => {
             </div>
             <div>
               <div>
-                {samplingStats.head_of_sampled_chain !== Const.LOADING_TEXT
+                {samplingStats?.head_of_sampled_chain !== Const.LOADING_TEXT
                   ? Data.formatNumberToDecimal(
-                      samplingStats.head_of_sampled_chain
+                      samplingStats?.head_of_sampled_chain
                     )
                   : Const.LOADING_TEXT}
               </div>
@@ -204,8 +204,8 @@ const LightNodePage = ({ isSearch, searchInput }) => {
             </div>
             <div>
               <div>
-                {samplingStats.head_of_catchup !== Const.LOADING_TEXT
-                  ? Data.formatNumberToDecimal(samplingStats.head_of_catchup)
+                {samplingStats?.head_of_catchup !== Const.LOADING_TEXT
+                  ? Data.formatNumberToDecimal(samplingStats?.head_of_catchup)
                   : Const.LOADING_TEXT}
               </div>
             </div>
@@ -216,9 +216,9 @@ const LightNodePage = ({ isSearch, searchInput }) => {
             </div>
             <div>
               <div>
-                {samplingStats.network_head_height !== Const.LOADING_TEXT
+                {samplingStats?.network_head_height !== Const.LOADING_TEXT
                   ? Data.formatNumberToDecimal(
-                      samplingStats.network_head_height
+                      samplingStats?.network_head_height
                     )
                   : Const.LOADING_TEXT}
               </div>
@@ -242,8 +242,8 @@ const LightNodePage = ({ isSearch, searchInput }) => {
             </div>
             <div>
               <div>
-                {samplingStats.is_running !== Const.LOADING_TEXT
-                  ? samplingStats.is_running.toString()
+                {samplingStats?.is_running !== Const.LOADING_TEXT
+                  ? samplingStats?.is_running.toString()
                   : Const.LOADING_TEXT}
               </div>
             </div>
@@ -267,7 +267,7 @@ function Signatures(data) {
   return (
     <SignatureTable
       columns={Data.signatures_column}
-      data={data.signatures}
+      data={data?.signatures}
       isLoading={false}
     />
   );
@@ -277,7 +277,7 @@ function Validator(data) {
   return (
     <ValidatorTable
       columns={Data.validators_column}
-      data={data.validators}
+      data={data?.validators}
       isLoading={false}
     />
   );
@@ -298,12 +298,12 @@ function Overview(data) {
           <tbody className={styles.operator_detail_overview_table_tbody}>
             <tr>
               <th>Chain ID</th>
-              <td>{data.chain_id}</td>
+              <td>{data?.chain_id}</td>
             </tr>
             <tr>
               <th>Height</th>
               <td>
-                {data.height !== undefined
+                {data?.height !== undefined
                   ? Data.formatNumberToDecimal(data.height)
                   : 0}
               </td>
@@ -311,10 +311,10 @@ function Overview(data) {
             <tr>
               <th>Time</th>
               <td>
-                <Tooltip title={data.time}>
+                <Tooltip title={data?.time}>
                   <span>
-                    {data.time !== undefined
-                      ? Data.formatTimeToText(data.time)
+                    {data?.time !== undefined
+                      ? Data.formatTimeToText(data?.time)
                       : 0}
                   </span>
                 </Tooltip>
@@ -323,12 +323,12 @@ function Overview(data) {
             <tr>
               <th>Block Hash</th>
               <td>
-                <Tooltip title={data.block_hash}>
+                <Tooltip title={data?.block_hash}>
                   <span>
-                    {Data.formatString(data.block_hash)}
+                    {Data.formatString(data?.block_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.block_hash)}
+                      onClick={(e) => copyToClipBoard(data?.block_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -337,12 +337,12 @@ function Overview(data) {
             <tr>
               <th>Last Block Hash</th>
               <td>
-                <Tooltip title={data.last_block_hash}>
+                <Tooltip title={data?.last_block_hash}>
                   <span>
-                    {Data.formatString(data.last_block_hash)}
+                    {Data.formatString(data?.last_block_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.last_block_hash)}
+                      onClick={(e) => copyToClipBoard(data?.last_block_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -351,12 +351,12 @@ function Overview(data) {
             <tr>
               <th>Last Commit Hash</th>
               <td>
-                <Tooltip title={data.last_commit_hash}>
+                <Tooltip title={data?.last_commit_hash}>
                   <span>
-                    {Data.formatString(data.last_commit_hash)}
+                    {Data.formatString(data?.last_commit_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.last_commit_hash)}
+                      onClick={(e) => copyToClipBoard(data?.last_commit_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -365,12 +365,12 @@ function Overview(data) {
             <tr>
               <th>Data Hash</th>
               <td>
-                <Tooltip title={data.data_hash}>
+                <Tooltip title={data?.data_hash}>
                   <span>
-                    {Data.formatString(data.data_hash)}
+                    {Data.formatString(data?.data_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.data_hash)}
+                      onClick={(e) => copyToClipBoard(data?.data_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -379,12 +379,12 @@ function Overview(data) {
             <tr>
               <th>Validators Hash</th>
               <td>
-                <Tooltip title={data.validators_hash}>
+                <Tooltip title={data?.validators_hash}>
                   <span>
-                    {Data.formatString(data.validators_hash)}
+                    {Data.formatString(data?.validators_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.validators_hash)}
+                      onClick={(e) => copyToClipBoard(data?.validators_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -393,12 +393,12 @@ function Overview(data) {
             <tr>
               <th>Consensus Hash</th>
               <td>
-                <Tooltip title={data.consensus_hash}>
+                <Tooltip title={data?.consensus_hash}>
                   <span>
-                    {Data.formatString(data.consensus_hash)}
+                    {Data.formatString(data?.consensus_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.consensus_hash)}
+                      onClick={(e) => copyToClipBoard(data?.consensus_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -407,12 +407,12 @@ function Overview(data) {
             <tr>
               <th>App Hash</th>
               <td>
-                <Tooltip title={data.app_hash}>
+                <Tooltip title={data?.app_hash}>
                   <span>
-                    {Data.formatString(data.app_hash)}
+                    {Data.formatString(data?.app_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data.app_hash)}
+                      onClick={(e) => copyToClipBoard(data?.app_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -424,10 +424,10 @@ function Overview(data) {
                 <Link
                     target="_blank"
                     underline="hover"
-                    href={Utils.validatorLink(data.proposer_address)}
+                    href={Utils.validatorLink(data?.proposer_address)}
                     className={styles.link}
                 >
-                  {data.proposer_address}
+                  {data?.proposer_address}
                 </Link>
                 <ShareLink /></td>
             </tr>
@@ -447,7 +447,7 @@ function Overview(data) {
             <tr>
               <th>column roots</th>
               <div style={{ padding: "5px" }}>
-                {data.dah?.column_roots.map((item) => (
+                {data?.dah?.column_roots.map((item) => (
                   <div>{item}</div>
                 ))}
               </div>
@@ -455,7 +455,7 @@ function Overview(data) {
             <tr>
               <th>row roots</th>
               <div style={{ padding: "5px" }}>
-                {data.dah?.row_roots.map((item) => (
+                {data?.dah?.row_roots.map((item) => (
                   <div>{item}</div>
                 ))}
               </div>

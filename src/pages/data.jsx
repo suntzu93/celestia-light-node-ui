@@ -228,13 +228,15 @@ export const getNodeId = async () => {
 
 export const getBalance = async (address) => {
   try {
-    const response = await fetch(Const.URL_GET_BALANCE + address);
-    const dataJson = await response.json();
-    return formatBalance(dataJson.balances);
+    if (address){
+      const response = await fetch(Const.URL_GET_BALANCE + address);
+      const dataJson = await response.json();
+      return formatBalance(dataJson.balances);
+    }
   } catch (e) {
     console.log("get balance error " + e);
-    return "0";
   }
+  return "0";
 };
 
 export const getSamplingStats = async () => {

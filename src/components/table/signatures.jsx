@@ -185,7 +185,7 @@ export const SignatureTable = ({ columns, data, isLoading }) => {
                     order={order}
                     orderBy={orderBy}
                     onRequestSort={handleRequestSort}
-                    rowCount={rowData.length}
+                    rowCount={rowData?.length}
                   />
                   <TableBody>
                     {stableSort(rowData, getComparator(order, orderBy))
