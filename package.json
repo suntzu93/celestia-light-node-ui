@@ -23,7 +23,7 @@
     "start": "export PORT=5001 && vite",
     "build-prod": "vite build --mode production",
     "build": "vite build",
-    "preview": "vite preview --port 5001",
+    "preview": "vite preview --port 5001 --host",
     "prod": "npm run build && PORT=5001 serve -s build ",
     "codegen": "graphclient build",
     "graphql": "graphclient serve-dev"
