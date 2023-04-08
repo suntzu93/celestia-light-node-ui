@@ -1,2 +1,2 @@
-yarn build-prob
+yarn build-prod
 yarn preview

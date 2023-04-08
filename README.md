@@ -12,6 +12,13 @@ curl https://gist.githubusercontent.com/suntzu93/6f50b3a6863767479a09ad0cd2a190b
 ufw allow 5001
 
 # Now you can access by url : http://<your_server_ip>:5001
+
+# To update code 
+
+cd ~/celestia-light-node-ui
+git pull
+pm2 restart start_light_node_ui.sh
+
 ```
 
 ## Install by manually
