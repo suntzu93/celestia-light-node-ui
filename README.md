@@ -31,6 +31,16 @@ cd celestia-light-node-ui
 npm install -g yarn
 yarn install
 
+#------------ PROXY SERVER -------------------
+
+# Start proxy server to pass CORS
+node proxy_backend/proxy_server.js
+# PORT 5002 will be used for proxy server
+
+#-------------------------------
+
+
+#--------------- WEBSITE ----------------------
 # Get auth token by command 
 celestia light auth admin --p2p.network blockspacerace
 #copy data response and paste to .env file
@@ -47,6 +57,8 @@ yarn build-prod
 yarn preview
 
 # http://localhost:5001
+
+#-------------------------------
 ```
 
 ``
