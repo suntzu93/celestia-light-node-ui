@@ -36,12 +36,12 @@ export const formatString = (data) => {
   if (data == null) {
     return "...";
   }
-  if (data.length < 10) {
+  if (data.length < 15) {
     return data;
   }
 
-  const fistSymbol = data.slice(0, 7);
-  const endSymbol = data.slice(data.length - 7);
+  const fistSymbol = data.slice(0, 15);
+  const endSymbol = data.slice(data.length - 15);
   return fistSymbol + " ... " + endSymbol;
 };
 
