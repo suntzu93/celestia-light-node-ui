@@ -437,6 +437,10 @@
     padding-left: 20px;
 }
 
+.operator_detail_overview_table tbody.operator_detail_overview_table_tbody_sub th:first-child {
+    padding-left: 40px;
+}
+
 .operator_detail_overview_table_td {
     color: gray;
     font-size: 0.8em;

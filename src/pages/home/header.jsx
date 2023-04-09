@@ -22,7 +22,7 @@ const copyToClipBoard = (data) => {
   } catch (err) {}
 };
 
-function HeaderTab({ data }) {
+function HeaderTab({ data, syncState }) {
   const [value, setValue] = React.useState("1");
 
   const handleChange = (event, newValue) => {
@@ -36,7 +36,7 @@ function HeaderTab({ data }) {
           <TabList onChange={handleChange} aria-label="lab API tabs example">
             <Tab
               style={{ textTransform: "none", color: "black" }}
-              label="Latest"
+              label="Header"
               value="1"
             />
             <Tab
@@ -52,7 +52,7 @@ function HeaderTab({ data }) {
           </TabList>
         </Box>
         <TabPanel value="1" sx={{ padding: "0px" }}>
-          {Overview(data)}
+          {Overview(data, syncState)}
         </TabPanel>
         <TabPanel value="2" sx={{ padding: "0px" }}>
           {Signatures(data)}
@@ -65,7 +65,7 @@ function HeaderTab({ data }) {
   );
 }
 
-const LightNodePage = ({ isSearch, searchInput }) => {
+const HeaderPage = ({ isSearch, searchInput }) => {
   const [pageData, setPageData] = useState({
     rowData: [],
     isLoading: false,
@@ -84,14 +84,19 @@ const LightNodePage = ({ isSearch, searchInput }) => {
   });
 
   const [peerCount, setPeerCount] = useState(Const.LOADING_TEXT);
+  const [syncState, setSyncState] = useState(Const.LOADING_TEXT);
 
   const loadSamplingStatAndPeers = () => {
     Data.getSamplingStats().then((info) => {
       setSamplingStats(info);
     });
 
-    Data.getPeers().then((count) => {
-      setPeerCount(count);
+    Data.getPeers().then((peers) => {
+      setPeerCount(peers?.length);
+    });
+
+    Data.getSyncState().then((state) => {
+      setSyncState(state);
     });
   };
 
@@ -110,6 +115,7 @@ const LightNodePage = ({ isSearch, searchInput }) => {
     Data.getNodeId().then((nodeId) => {
       setNodeId(nodeId);
     });
+
     loadSamplingStatAndPeers();
     const interval = setInterval(() => {
       loadSamplingStatAndPeers();
@@ -146,7 +152,6 @@ const LightNodePage = ({ isSearch, searchInput }) => {
         totalPassengers: 0,
       });
     });
-
   }, [isSearch]);
 
   return (
@@ -256,7 +261,7 @@ const LightNodePage = ({ isSearch, searchInput }) => {
         </div>
       ) : (
         <div style={{ marginTop: "30px" }}>
-          <HeaderTab data={pageData.rowData} />
+          <HeaderTab data={pageData.rowData} syncState={syncState} />
         </div>
       )}
     </div>
@@ -283,7 +288,7 @@ function Validator(data) {
   );
 }
 
-function Overview(data) {
+function Overview(data, syncState) {
   return (
     <div className={styles.operator_detail_overview}>
       <div style={{ flex: "1 1 0%" }}>
@@ -291,7 +296,7 @@ function Overview(data) {
           <tbody>
             <tr>
               <th colSpan="2" style={{ fontWeight: "bold" }}>
-                Header
+                Latest Block
               </th>
             </tr>
           </tbody>
@@ -422,20 +427,17 @@ function Overview(data) {
               <th>Proposer</th>
               <td>
                 <Link
-                    target="_blank"
-                    underline="hover"
-                    href={Utils.validatorLink(data?.proposer_address)}
-                    className={styles.link}
+                  target="_blank"
+                  underline="hover"
+                  href={Utils.validatorLink(data?.proposer_address)}
+                  className={styles.link}
                 >
                   {data?.proposer_address}
                 </Link>
-                <ShareLink /></td>
+                <ShareLink />
+              </td>
             </tr>
           </tbody>
-        </table>
-      </div>
-      <div style={{ flex: "1 1 0%" }}>
-        <table className={styles.operator_detail_overview_table}>
           <tbody>
             <tr>
               <th colSpan="2" style={{ fontWeight: "bold" }}>
@@ -463,8 +465,73 @@ function Overview(data) {
           </tbody>
         </table>
       </div>
+      <div style={{ flex: "1 1 0%" }}>
+        <table className={styles.operator_detail_overview_table}>
+          <tbody>
+            <tr>
+              <th colSpan="2" style={{ fontWeight: "bold" }}>
+                Sync state
+              </th>
+            </tr>
+          </tbody>
+          <tbody className={styles.operator_detail_overview_table_tbody}>
+            <tr>
+              <th>Height</th>
+              <td>{Data.formatNumberToDecimal(syncState?.Height)}</td>
+            </tr>
+            <tr>
+              <th>From Height</th>
+              <td>{Data.formatNumberToDecimal(syncState?.FromHeight)}</td>
+            </tr>
+            <tr>
+              <th>To Height</th>
+              <td>{Data.formatNumberToDecimal(syncState?.ToHeight)}</td>
+            </tr>
+            <tr>
+              <th>From Hash</th>
+              <td>
+                {Data.formatString(syncState?.FromHash)}
+                <Tooltip title="Copied">
+                  <Copy
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => copyToClipBoard(syncState?.FromHash)}
+                  />
+                </Tooltip>
+              </td>
+            </tr>
+            <tr>
+              <th>To Hash</th>
+              <td>
+                {Data.formatString(syncState?.ToHash)}
+                <Tooltip title="Copied">
+                  <Copy
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => copyToClipBoard(syncState?.ToHash)}
+                  />
+                </Tooltip>
+              </td>
+            </tr>
+            <tr>
+              <th>Start</th>
+              <td>
+                <Tooltip title={syncState?.Start}>
+                  <span>{Data.formatTimeToText(syncState?.Start)}</span>
+                </Tooltip>
+              </td>
+            </tr>
+            <tr>
+              <th>End</th>
+              <td>
+                <Tooltip title={syncState?.End}>
+                  <span>{Data.formatTimeToText(syncState?.End)}</span>
+                </Tooltip>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-export default LightNodePage;
+export default HeaderPage;

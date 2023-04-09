@@ -32,6 +32,37 @@ export const validators_column = [
   },
 ];
 
+export const peers_column = [
+  {
+    header: "Node ID",
+    accessor: "nodeId",
+  },
+  {
+    header: "Num Streams Inbound",
+    accessor: "NumStreamsInbound",
+  },
+  {
+    header: "Num Streams Outbound",
+    accessor: "NumStreamsOutbound",
+  },
+  {
+    header: "Num Conns Inbound",
+    accessor: "NumConnsInbound",
+  },
+  {
+    header: "Num Conns Outbound",
+    accessor: "NumConnsOutbound",
+  },
+  {
+    header: "NumFD",
+    accessor: "NumFD",
+  },
+  {
+    header: "Memory",
+    accessor: "Memory",
+  },
+];
+
 export const formatString = (data) => {
   if (data == null) {
     return "...";
@@ -121,15 +152,19 @@ export const formatBalance = (balances) => {
   return "0";
 };
 
+function createHeader() {
+  const token = localStorage.getItem(Const.KEY_AUTH);
+  return {
+    Accept: "*/*",
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + token,
+  };
+}
+
 export const getAccountAddress = async () => {
   try {
     const url = Utils.getURL();
-    const token = localStorage.getItem(Const.KEY_AUTH);
-    const headers = {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    };
+    const headers = createHeader();
     const data = JSON.stringify({
       id: 1,
       jsonrpc: "2.0",
@@ -144,35 +179,6 @@ export const getAccountAddress = async () => {
     });
     const dataJson = await response.json();
     return dataJson.result;
-  } catch (e) {
-    console.log("get sampling stats error " + e);
-    return null;
-  }
-};
-
-export const getNodeId = async () => {
-  try {
-    const url = Utils.getURL();
-    const token = localStorage.getItem(Const.KEY_AUTH);
-    const headers = {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    };
-    const data = JSON.stringify({
-      id: 1,
-      jsonrpc: "2.0",
-      method: "p2p.Info",
-      params: [],
-    });
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: data,
-    });
-    const dataJson = await response.json();
-    return dataJson.result?.ID;
   } catch (e) {
     console.log("get sampling stats error " + e);
     return null;
@@ -195,12 +201,7 @@ export const getBalance = async (address) => {
 export const getSamplingStats = async () => {
   try {
     const url = Utils.getURL();
-    const token = localStorage.getItem(Const.KEY_AUTH);
-    const headers = {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    };
+    const headers = createHeader();
     const data = JSON.stringify({
       id: 1,
       jsonrpc: "2.0",
@@ -221,19 +222,14 @@ export const getSamplingStats = async () => {
   }
 };
 
-export const getPeers = async () => {
+export const getSyncState = async () => {
   try {
     const url = Utils.getURL();
-    const token = localStorage.getItem(Const.KEY_AUTH);
-    const headers = {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    };
+    const headers = createHeader();
     const data = JSON.stringify({
       id: 1,
       jsonrpc: "2.0",
-      method: "p2p.Peers",
+      method: "header.SyncState",
       params: [],
     });
 
@@ -243,9 +239,9 @@ export const getPeers = async () => {
       body: data,
     });
     const dataJson = await response.json();
-    return dataJson.result.length;
+    return dataJson.result;
   } catch (e) {
-    console.log("get getPeers error " + e);
+    console.log("get getSyncState stats error " + e);
     return null;
   }
 };
@@ -253,12 +249,7 @@ export const getPeers = async () => {
 export const getHeaders = async (isSearch, searchInput) => {
   try {
     const url = Utils.getURL();
-    const token = localStorage.getItem(Const.KEY_AUTH);
-    const headers = {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    };
+    const headers = createHeader();
     let data;
     if (isSearch && searchInput?.length > 0) {
       let method = "header.GetByHash";
@@ -289,6 +280,98 @@ export const getHeaders = async (isSearch, searchInput) => {
     return formatHeader(dataJson.result);
   } catch (e) {
     console.log("get header error " + e);
+    return null;
+  }
+};
+
+// ------------ p2p ------------
+
+//function to convert bytes to MB
+export const convertBytesToMB = (bytes) => {
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 Byte";
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+};
+
+async function requestP2p(method) {
+  try {
+    const url = Utils.getURL();
+    const headers = createHeader();
+    const data = JSON.stringify({
+      id: 1,
+      jsonrpc: "2.0",
+      method: method,
+      params: [],
+    });
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: data,
+    });
+    const dataJson = await response.json();
+    return dataJson.result;
+  } catch (e) {
+    console.log("get p2p error " + e);
+  }
+  return null;
+}
+
+export const getNodeId = async () => {
+  try {
+    const results = await requestP2p("p2p.Info");
+    return results?.ID;
+  } catch (e) {
+    console.log("get getNodeId stats error " + e);
+    return null;
+  }
+};
+
+export const getPeers = async () => {
+  try {
+    return await requestP2p("p2p.Peers");
+  } catch (e) {
+    console.log("get getPeers error " + e);
+    return null;
+  }
+};
+
+const formatResourceState = (resourceState) => ({
+  System: resourceState.System,
+  Transient: resourceState.Transient,
+  Services: resourceState.Services,
+  Protocols: resourceState.Protocols,
+  Peers: resourceState.Peers,
+});
+
+export const getResourceState = async () => {
+  try {
+    const result = await requestP2p("p2p.ResourceState");
+    return formatResourceState(result);
+  } catch (e) {
+    console.log("get ResourceState error " + e);
+    return null;
+  }
+};
+
+export const getBandwidthStats = async () => {
+  try {
+    return await requestP2p("p2p.BandwidthStats");
+  } catch (e) {
+    console.log("get getBandwidthStats error " + e);
+    return null;
+  }
+};
+
+export const getUptime = async (nodeId) => {
+  try {
+    const API = "https://leaderboard.celestia.tools/api/v1/nodes/" + nodeId;
+    const response = await fetch(API);
+    const dataJson = await response.json();
+    return dataJson.uptime;
+  } catch (e) {
+    console.log("get getUptime error " + e);
     return null;
   }
 };

@@ -8,7 +8,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { browserHistory } from "react-router";
 import styles from "./styles.module.css";
-import LightNodePage from "./lightnode";
+import HeaderPage from "./header";
 import * as Const from "../../utils/Cons";
 import IconButton from "@mui/material/IconButton";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -16,9 +16,10 @@ import Menu from "@mui/material/Menu";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import { ReactComponent as Logo } from "../../../public/logo.svg";
+import P2PPage from "./p2p";
 
 const HomePage = () => {
-  const [tab, setTab] = React.useState("light_node");
+  const [tab, setTab] = React.useState("header");
   const [anchorElSetting, setAnchorElSetting] = React.useState(null);
   const [searchInput, setSearchInput] = React.useState("");
   const [isSearch, setIsSearch] = React.useState(false);
@@ -33,6 +34,13 @@ const HomePage = () => {
   // const openSetting = Boolean(anchorElSetting);
 
   useEffect(() => {
+    const pathName = window.location.pathname;
+    if (pathName.startsWith("/p2p")) {
+      setTab("p2p");
+    }else {
+      setTab("header");
+    }
+
     if (
       !localStorage.getItem(Const.KEY_IP) ||
       localStorage.getItem(Const.KEY_IP) !== import.meta.env.VITE_RPC
@@ -47,11 +55,19 @@ const HomePage = () => {
     }
   }, []);
 
-  function LightNode() {
+  function renderHeaderPage() {
     return (
       <div>
-        <LightNodePage isSearch={isSearch} searchInput={searchInput} />
+        <HeaderPage isSearch={isSearch} searchInput={searchInput} />
       </div>
+    );
+  }
+
+  function renderP2pPage() {
+    return (
+        <div>
+          <P2PPage isSearch={isSearch} searchInput={searchInput} />
+        </div>
     );
   }
 
@@ -63,12 +79,12 @@ const HomePage = () => {
     const handleChange = (event, newValue) => {
       setTab(newValue);
       switch (newValue) {
-        case "light_node":
-          return browserHistory.push("/lightNode");
+        case "header":
+          return browserHistory.push("/header");
         case "p2p":
           return browserHistory.push("/p2p");
         default:
-          return browserHistory.push("/lightNode");
+          return browserHistory.push("/header");
       }
     };
 
@@ -92,15 +108,15 @@ const HomePage = () => {
       }
     };
 
-    function authTokenChange(e) {
-      localStorage.setItem(Const.KEY_AUTH, e.target.value);
-      setAuthToken(e.target.value);
-    }
-
-    function ipChange(e) {
-      localStorage.setItem(Const.KEY_IP, e.target.value);
-      setIpNode(e.target.value);
-    }
+    // function authTokenChange(e) {
+    //   localStorage.setItem(Const.KEY_AUTH, e.target.value);
+    //   setAuthToken(e.target.value);
+    // }
+    //
+    // function ipChange(e) {
+    //   localStorage.setItem(Const.KEY_IP, e.target.value);
+    //   setIpNode(e.target.value);
+    // }
 
     return (
       <Box sx={{ width: "100%", typography: "body" }}>
@@ -130,7 +146,8 @@ const HomePage = () => {
               aria-label=""
               sx={{ display: "flex", paddingLeft: "20px", minWidth: "500px" }}
             >
-              <Tab sx={{ padding: 0 }} label="Light node" value="light_node" />
+              <Tab sx={{ padding: 0 }} label="Header" value="header" />
+              <Tab sx={{ padding: 0 }} label="P2P" value="p2p" />
             </TabList>
             <div style={{ flex: "1 1 0%" }}></div>
             <div className={styles.search}>
@@ -210,8 +227,8 @@ const HomePage = () => {
               </TabList>
             </div>
           </Box>
-          <TabPanel value="light_node">{LightNode()}</TabPanel>
-          {/*<TabPanel value="p2p">{operators()}</TabPanel>*/}
+          <TabPanel value="header">{renderHeaderPage()}</TabPanel>
+          <TabPanel value="p2p">{renderP2pPage()}</TabPanel>
           {/*<TabPanel value="operatorDetail">{operatorDetail()}</TabPanel>*/}
           <TabPanel value="about">{about()}</TabPanel>
         </TabContext>
