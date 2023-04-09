@@ -47,7 +47,7 @@ celestia light auth admin --p2p.network blockspacerace
 
 # create a .env file
 cp .env.example .env
-# edit VITE_TOKEN and VITE_RPC in .env file
+# edit VITE_TOKEN, VITE_RPC and NODE_PORT in .env file
 
 # run in dev mode
 yarn start
