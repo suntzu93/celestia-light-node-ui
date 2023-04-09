@@ -287,7 +287,8 @@ const HeaderPage = ({ isSearch, searchInput }) => {
               </div>
             </div>
           </div>
-          {JSON.stringify(samplingStats?.failed).length > 0 ? (
+          {samplingStats?.failed !== undefined &&
+          JSON.stringify(samplingStats?.failed).length > 0 ? (
             <div className={styles.operator_detail_header_value_item}>
               <div
                 className={styles.operator_detail_header_value_item_lable}
@@ -706,7 +707,10 @@ function FailedDialog(showFailed, setShowFailed, failed) {
     setShowFailed(false);
   };
 
-  const keys = Object.keys(failed);
+  let keys = [];
+  if (failed) {
+    keys = Object.keys(failed);
+  }
 
   return (
     <div>
