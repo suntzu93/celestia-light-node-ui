@@ -67,12 +67,12 @@ export const formatString = (data) => {
   if (data == null) {
     return "...";
   }
-  if (data.length < 15) {
+  if (data.length < 10) {
     return data;
   }
 
-  const fistSymbol = data.slice(0, 15);
-  const endSymbol = data.slice(data.length - 15);
+  const fistSymbol = data.slice(0, 10);
+  const endSymbol = data.slice(data.length - 10);
   return fistSymbol + " ... " + endSymbol;
 };
 
@@ -280,6 +280,56 @@ export const getHeaders = async (isSearch, searchInput) => {
     return formatHeader(dataJson.result);
   } catch (e) {
     console.log("get header error " + e);
+    return null;
+  }
+};
+
+// ------------------ shares -----------------
+
+export const getProbabilityOfAvailability = async () => {
+  try {
+    const url = Utils.getURL();
+    const headers = createHeader();
+    const data = JSON.stringify({
+      id: 1,
+      jsonrpc: "2.0",
+      method: "share.ProbabilityOfAvailability",
+      params: [],
+    });
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: data,
+    });
+    const dataJson = await response.json();
+    return dataJson.result;
+  } catch (e) {
+    console.log("get getSyncState stats error " + e);
+    return null;
+  }
+};
+
+export const getGetEDS = async (root) => {
+  try {
+    const url = Utils.getURL();
+    const headers = createHeader();
+    const data = JSON.stringify({
+      id: 1,
+      jsonrpc: "2.0",
+      method: "share.GetEDS",
+      params: [root],
+    });
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: data,
+    });
+    const dataJson = await response.json();
+    return dataJson.result;
+  } catch (e) {
+    console.log("get getSyncState stats error " + e);
     return null;
   }
 };

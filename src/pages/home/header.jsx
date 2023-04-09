@@ -5,6 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { ReactComponent as Copy } from "../../assets/copy.svg";
 import * as Const from "../../utils/Cons";
 import * as Utils from "../../utils/utils";
+import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TabContext from "@mui/lab/TabContext";
 import Tab from "@mui/material/Tab";
@@ -15,6 +16,11 @@ import SignatureTable from "../../components/table/signatures";
 import ValidatorTable from "../../components/table/validators";
 import Link from "@mui/material/Link";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 const copyToClipBoard = (data) => {
   try {
@@ -22,7 +28,7 @@ const copyToClipBoard = (data) => {
   } catch (err) {}
 };
 
-function HeaderTab({ data, syncState }) {
+function HeaderTab({ data, syncState, probabilityOfAvailability }) {
   const [value, setValue] = React.useState("1");
 
   const handleChange = (event, newValue) => {
@@ -52,7 +58,7 @@ function HeaderTab({ data, syncState }) {
           </TabList>
         </Box>
         <TabPanel value="1" sx={{ padding: "0px" }}>
-          {Overview(data, syncState)}
+          {Overview(data, syncState, probabilityOfAvailability)}
         </TabPanel>
         <TabPanel value="2" sx={{ padding: "0px" }}>
           {Signatures(data)}
@@ -81,10 +87,18 @@ const HeaderPage = ({ isSearch, searchInput }) => {
     head_of_catchup: Const.LOADING_TEXT,
     network_head_height: Const.LOADING_TEXT,
     is_running: Const.LOADING_TEXT,
+    catch_up_done: Const.LOADING_TEXT,
+    failed: {},
   });
 
   const [peerCount, setPeerCount] = useState(Const.LOADING_TEXT);
   const [syncState, setSyncState] = useState(Const.LOADING_TEXT);
+
+  const [probabilityOfAvailability, setProbabilityOfAvailability] = useState(
+    Const.LOADING_TEXT
+  );
+
+  const [showFailed, setShowFailed] = useState(false);
 
   const loadSamplingStatAndPeers = () => {
     Data.getSamplingStats().then((info) => {
@@ -97,6 +111,10 @@ const HeaderPage = ({ isSearch, searchInput }) => {
 
     Data.getSyncState().then((state) => {
       setSyncState(state);
+    });
+
+    Data.getProbabilityOfAvailability().then((probabilityOfAvailability) => {
+      setProbabilityOfAvailability(probabilityOfAvailability);
     });
   };
 
@@ -153,6 +171,10 @@ const HeaderPage = ({ isSearch, searchInput }) => {
       });
     });
   }, [isSearch]);
+
+  function viewFailed() {
+    setShowFailed(true);
+  }
 
   return (
     <div>
@@ -253,6 +275,37 @@ const HeaderPage = ({ isSearch, searchInput }) => {
               </div>
             </div>
           </div>
+          <div className={styles.operator_detail_header_value_item}>
+            <div className={styles.operator_detail_header_value_item_lable}>
+              catch up done
+            </div>
+            <div>
+              <div>
+                {samplingStats?.catch_up_done !== Const.LOADING_TEXT
+                  ? samplingStats?.catch_up_done.toString()
+                  : Const.LOADING_TEXT}
+              </div>
+            </div>
+          </div>
+          {JSON.stringify(samplingStats?.failed).length > 0 ? (
+            <div className={styles.operator_detail_header_value_item}>
+              <div
+                className={styles.operator_detail_header_value_item_lable}
+                style={{ textAlign: "center" }}
+              >
+                failed
+              </div>
+              <Button
+                sx={{ textTransform: "none" }}
+                variant="text"
+                onClick={() => viewFailed()}
+              >
+                view
+              </Button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       {pageData.isLoading ? (
@@ -261,9 +314,14 @@ const HeaderPage = ({ isSearch, searchInput }) => {
         </div>
       ) : (
         <div style={{ marginTop: "30px" }}>
-          <HeaderTab data={pageData.rowData} syncState={syncState} />
+          <HeaderTab
+            data={pageData.rowData}
+            syncState={syncState}
+            probabilityOfAvailability={probabilityOfAvailability}
+          />
         </div>
       )}
+      {FailedDialog(showFailed, setShowFailed, samplingStats?.failed)}
     </div>
   );
 };
@@ -288,10 +346,18 @@ function Validator(data) {
   );
 }
 
-function Overview(data, syncState) {
+function Overview(header, syncState, probabilityOfAvailability) {
+  const [showEDS, setShowEDS] = useState(false);
+  const [root, setRoot] = useState();
+
+  const viewFullEDS = async (header) => {
+    setShowEDS(true);
+    setRoot(header?.dah);
+  };
+
   return (
     <div className={styles.operator_detail_overview}>
-      <div style={{ flex: "1 1 0%" }}>
+      <div style={{ flex: "2 2 0%" }}>
         <table className={styles.operator_detail_overview_table}>
           <tbody>
             <tr>
@@ -303,23 +369,23 @@ function Overview(data, syncState) {
           <tbody className={styles.operator_detail_overview_table_tbody}>
             <tr>
               <th>Chain ID</th>
-              <td>{data?.chain_id}</td>
+              <td>{header?.chain_id}</td>
             </tr>
             <tr>
               <th>Height</th>
               <td>
-                {data?.height !== undefined
-                  ? Data.formatNumberToDecimal(data.height)
+                {header?.height !== undefined
+                  ? Data.formatNumberToDecimal(header.height)
                   : 0}
               </td>
             </tr>
             <tr>
               <th>Time</th>
               <td>
-                <Tooltip title={data?.time}>
+                <Tooltip title={header?.time}>
                   <span>
-                    {data?.time !== undefined
-                      ? Data.formatTimeToText(data?.time)
+                    {header?.time !== undefined
+                      ? Data.formatTimeToText(header?.time)
                       : 0}
                   </span>
                 </Tooltip>
@@ -328,12 +394,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Block Hash</th>
               <td>
-                <Tooltip title={data?.block_hash}>
+                <Tooltip title={header?.block_hash}>
                   <span>
-                    {Data.formatString(data?.block_hash)}
+                    {Data.formatString(header?.block_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.block_hash)}
+                      onClick={(e) => copyToClipBoard(header?.block_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -342,12 +408,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Last Block Hash</th>
               <td>
-                <Tooltip title={data?.last_block_hash}>
+                <Tooltip title={header?.last_block_hash}>
                   <span>
-                    {Data.formatString(data?.last_block_hash)}
+                    {Data.formatString(header?.last_block_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.last_block_hash)}
+                      onClick={(e) => copyToClipBoard(header?.last_block_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -356,12 +422,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Last Commit Hash</th>
               <td>
-                <Tooltip title={data?.last_commit_hash}>
+                <Tooltip title={header?.last_commit_hash}>
                   <span>
-                    {Data.formatString(data?.last_commit_hash)}
+                    {Data.formatString(header?.last_commit_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.last_commit_hash)}
+                      onClick={(e) => copyToClipBoard(header?.last_commit_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -370,12 +436,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Data Hash</th>
               <td>
-                <Tooltip title={data?.data_hash}>
+                <Tooltip title={header?.data_hash}>
                   <span>
-                    {Data.formatString(data?.data_hash)}
+                    {Data.formatString(header?.data_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.data_hash)}
+                      onClick={(e) => copyToClipBoard(header?.data_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -384,12 +450,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Validators Hash</th>
               <td>
-                <Tooltip title={data?.validators_hash}>
+                <Tooltip title={header?.validators_hash}>
                   <span>
-                    {Data.formatString(data?.validators_hash)}
+                    {Data.formatString(header?.validators_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.validators_hash)}
+                      onClick={(e) => copyToClipBoard(header?.validators_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -398,12 +464,12 @@ function Overview(data, syncState) {
             <tr>
               <th>Consensus Hash</th>
               <td>
-                <Tooltip title={data?.consensus_hash}>
+                <Tooltip title={header?.consensus_hash}>
                   <span>
-                    {Data.formatString(data?.consensus_hash)}
+                    {Data.formatString(header?.consensus_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.consensus_hash)}
+                      onClick={(e) => copyToClipBoard(header?.consensus_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -412,12 +478,12 @@ function Overview(data, syncState) {
             <tr>
               <th>App Hash</th>
               <td>
-                <Tooltip title={data?.app_hash}>
+                <Tooltip title={header?.app_hash}>
                   <span>
-                    {Data.formatString(data?.app_hash)}
+                    {Data.formatString(header?.app_hash)}
                     <Copy
                       style={{ cursor: "pointer" }}
-                      onClick={(e) => copyToClipBoard(data?.app_hash)}
+                      onClick={(e) => copyToClipBoard(header?.app_hash)}
                     />
                   </span>
                 </Tooltip>
@@ -429,10 +495,10 @@ function Overview(data, syncState) {
                 <Link
                   target="_blank"
                   underline="hover"
-                  href={Utils.validatorLink(data?.proposer_address)}
+                  href={Utils.validatorLink(header?.proposer_address)}
                   className={styles.link}
                 >
-                  {data?.proposer_address}
+                  {header?.proposer_address}
                 </Link>
                 <ShareLink />
               </td>
@@ -449,7 +515,7 @@ function Overview(data, syncState) {
             <tr>
               <th>column roots</th>
               <div style={{ padding: "5px" }}>
-                {data?.dah?.column_roots.map((item) => (
+                {header?.dah?.column_roots.map((item) => (
                   <div>{item}</div>
                 ))}
               </div>
@@ -457,7 +523,7 @@ function Overview(data, syncState) {
             <tr>
               <th>row roots</th>
               <div style={{ padding: "5px" }}>
-                {data?.dah?.row_roots.map((item) => (
+                {header?.dah?.row_roots.map((item) => (
                   <div>{item}</div>
                 ))}
               </div>
@@ -465,7 +531,7 @@ function Overview(data, syncState) {
           </tbody>
         </table>
       </div>
-      <div style={{ flex: "1 1 0%" }}>
+      <div style={{ flex: "1.5 1.5 0%" }}>
         <table className={styles.operator_detail_overview_table}>
           <tbody>
             <tr>
@@ -530,6 +596,147 @@ function Overview(data, syncState) {
           </tbody>
         </table>
       </div>
+      <div style={{ flex: "1 1 0%" }}>
+        <table className={styles.operator_detail_overview_table}>
+          <tbody>
+            <tr>
+              <th colSpan="2" style={{ fontWeight: "bold" }}>
+                Shares
+              </th>
+            </tr>
+          </tbody>
+          <tbody className={styles.operator_detail_overview_table_tbody}>
+            <tr>
+              <th>Probability Of Availability</th>
+              <td>{probabilityOfAvailability}</td>
+            </tr>
+            <tr>
+              <th>Full EDS identified</th>
+              <Button
+                variant="text"
+                sx={{ marginLeft: "50px", textTransform: "none" }}
+                onClick={() => viewFullEDS(header)}
+              >
+                view full
+              </Button>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {EDSDialog(showEDS, setShowEDS, root)}
+    </div>
+  );
+}
+
+function EDSDialog(showEDS, setShowEDS, root) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [edsFull, setEdsFull] = React.useState([]);
+
+  React.useEffect(() => {
+    if (showEDS) {
+      const { current: descriptionElement } = descriptionElementRef;
+      if (descriptionElement !== null) {
+        descriptionElement.focus();
+      }
+
+      setIsLoading(true);
+      Data.getGetEDS(root).then((data) => {
+        setIsLoading(false);
+        setEdsFull(data);
+      });
+    }
+  }, [showEDS]);
+
+  const handleClose = () => {
+    setShowEDS(false);
+  };
+
+  const descriptionElementRef = React.useRef(null);
+
+  return (
+    <div>
+      <Dialog
+        fullWidth={true}
+        maxWidth={"md"}
+        open={showEDS}
+        onClose={handleClose}
+        scroll={"paper"}
+        aria-labelledby="scroll-dialog-title"
+        aria-describedby="scroll-dialog-description"
+      >
+        <DialogTitle id="scroll-dialog-title">Full EDS identified</DialogTitle>
+        <DialogContent dividers={scroll === "paper"}>
+          {isLoading ? (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Loader />
+            </div>
+          ) : (
+            <DialogContentText
+              id="scroll-dialog-description"
+              ref={descriptionElementRef}
+              tabIndex={-1}
+            >
+              {edsFull?.data_square?.map((item) => (
+                <>
+                  <div style={{ wordWrap: "break-word" }}>{item}</div>
+                  <div className={styles.div_divide}></div>
+                </>
+              ))}
+            </DialogContentText>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function FailedDialog(showFailed, setShowFailed, failed) {
+  const descriptionElementRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (showFailed) {
+      const { current: descriptionElement } = descriptionElementRef;
+      if (descriptionElement !== null) {
+        descriptionElement.focus();
+      }
+    }
+  }, [showFailed]);
+
+  const handleClose = () => {
+    setShowFailed(false);
+  };
+
+  const keys = Object.keys(failed);
+
+  return (
+    <div>
+      <Dialog
+        fullWidth={true}
+        maxWidth={"xs"}
+        open={showFailed}
+        onClose={handleClose}
+        scroll={"paper"}
+        aria-labelledby="scroll-dialog-title"
+        aria-describedby="scroll-dialog-description"
+      >
+        <DialogTitle id="scroll-dialog-title">List block failed </DialogTitle>
+        <DialogContent dividers={scroll === "paper"}>
+          <DialogContentText
+            id="scroll-dialog-description"
+            ref={descriptionElementRef}
+            tabIndex={-1}
+          >
+            {keys?.map((key) => (
+              <>
+                <div style={{ wordWrap: "break-word" }}>
+                  {key} : {failed[key]}
+                </div>
+                <div className={styles.div_divide}></div>
+              </>
+            ))}
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
