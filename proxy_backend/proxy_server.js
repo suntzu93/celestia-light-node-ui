@@ -1,3 +1,4 @@
+require('dotenv').config();
 const http = require('http');
 
 const corsHeaders = {
@@ -26,7 +27,7 @@ const server = http.createServer((req, res) => {
 
       const options = {
         hostname: '127.0.0.1',
-        port: 26658,
+        port: process.env.NODE_PORT || 26658,
         path: '/',
         method: 'POST',
         headers: {

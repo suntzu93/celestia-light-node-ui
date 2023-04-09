@@ -21,3 +21,6 @@ yarn-debug.log*
 yarn.lock*
 yarn-error.log*
 
+/proxy_backend/node_modules
+/proxy_backend/yarn.lock
+
