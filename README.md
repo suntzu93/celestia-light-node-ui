@@ -8,8 +8,9 @@ Provide information related to the Header, Share, P2p, DAS, and State of your li
 curl https://gist.githubusercontent.com/suntzu93/6f50b3a6863767479a09ad0cd2a190b4/raw/install_light_node_ui.sh | bash
 
 # url : http://0.0.0.0:5001
-# If you want access from client then allow firewall port 5001 if you are using ufw.
+# If you want access from client then allow firewall port 5001 and 5002 if you are using ufw.
 ufw allow 5001
+ufw allow 5002
 
 # Now you can access by url : http://<your_server_ip>:5001
 
@@ -57,6 +58,10 @@ yarn build-prod
 yarn preview
 
 # http://localhost:5001
+
+# If you want access from client then allow firewall port 5001 and 5002 if you are using ufw.
+ufw allow 5001
+ufw allow 5002
 
 #-------------------------------
 ```
