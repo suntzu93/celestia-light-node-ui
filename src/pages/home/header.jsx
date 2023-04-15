@@ -24,9 +24,27 @@ import DialogTitle from "@mui/material/DialogTitle";
 
 const copyToClipBoard = (data) => {
   try {
-    navigator.clipboard.writeText(data);
+    if (navigator.clipboard) { // If normal copy method available, use it
+      navigator.clipboard.writeText(data);
+    } else { // Otherwise fallback to the above function
+      unsecuredCopyToClipboard(data);
+    }
   } catch (err) {}
 };
+
+function unsecuredCopyToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Unable to copy to clipboard', err);
+  }
+  document.body.removeChild(textArea);
+}
 
 function HeaderTab({ data, syncState, probabilityOfAvailability }) {
   const [value, setValue] = React.useState("1");
